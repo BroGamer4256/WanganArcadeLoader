@@ -1,0 +1,3 @@
+terminal = false
+movies = true
+skipTerminal = true

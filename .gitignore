@@ -1,0 +1,8 @@
+build/
+compile_commands.json
+.cache
+subprojects/minhook
+subprojects/packagecache
+subprojects/tomlc99
+subprojects/SDL2-2.26.5
+dist.7z
