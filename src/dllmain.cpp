@@ -424,22 +424,6 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		// Mostly stolen from openparrot
 		memset (haspBuffer, 0, 0xD40);
-		haspBuffer[0]    = 0x01;
-		haspBuffer[0x13] = 0x01;
-		haspBuffer[0x17] = 0x0A;
-		haspBuffer[0x1B] = 0x04;
-		haspBuffer[0x1C] = 0x3B;
-		haspBuffer[0x1D] = 0x6B;
-		haspBuffer[0x1E] = 0x40;
-		haspBuffer[0x1F] = 0x87;
-
-		haspBuffer[0x23] = 0x01;
-		haspBuffer[0x27] = 0x0A;
-		haspBuffer[0x2B] = 0x04;
-		haspBuffer[0x2C] = 0x3B;
-		haspBuffer[0x2D] = 0x6B;
-		haspBuffer[0x2E] = 0x40;
-		haspBuffer[0x2F] = 0x87;
 		if (isTerminal) strcpy ((char *)(haspBuffer + 0xD00), "285011501138");
 		else strcpy ((char *)(haspBuffer + 0xD00), "285013501138");
 		u8 crc = 0;
