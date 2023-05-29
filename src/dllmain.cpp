@@ -314,6 +314,7 @@ HOOK (i32, WAJVSioSetMode, ASLR (0x140017980), u8 a1, u8 a2, u8 a3, u16 a4) { re
 HOOK (i32, WAJVUpdate, ASLR (0x140016C10)) { return 1; }
 HOOK (i32, WAJVGetNodeCount, ASLR (0x140017880)) { return 1; }
 HOOK (void, Breakpoint, PROC_ADDRESS ("kernel32.dll", "DebugBreak")) {}
+HOOK (i32, ShowMouse, PROC_ADDRESS ("user32.dll", "ShowCursor"), i32 show) { return originalShowMouse (true); }
 
 HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int styleEx, wchar_t *className, wchar_t *windowName, int style, int x, int y, int width, int height, HWND parent,
       void *menu, void *instance, void *param) {
@@ -366,9 +367,9 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		bool movies          = true;
 		bool skipTerminal    = true;
 		if (config) {
-			isTerminal   = readConfigBool (config, (char *)"terminal", isTerminal);
-			movies       = readConfigBool (config, (char *)"movies", movies);
-			skipTerminal = readConfigBool (config, (char *)"skipTerminal", skipTerminal);
+			isTerminal   = readConfigBool (config, "terminal", isTerminal);
+			movies       = readConfigBool (config, "movies", movies);
+			skipTerminal = readConfigBool (config, "skipTerminal", skipTerminal);
 		}
 
 		INSTALL_HOOK (IoOpen);
@@ -397,6 +398,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (WAJVGetNodeCount);
 
 		INSTALL_HOOK (Breakpoint);
+		INSTALL_HOOK (ShowMouse);
 		INSTALL_HOOK (WindowCreateW);
 		if (!movies) INSTALL_HOOK (MoviePlayerOpen);
 
@@ -414,17 +416,13 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		WRITE_NOP (ASLR (0x140B1C743), 2);
 		WRITE_MEMORY (ASLR (0x140B41DAA), u8, 0xEB); // Content router
 
-		WRITE_MEMORY (ASLR (0x1409C1CA0), u8, 0xB8, (u8)(isTerminal ? 0x01 : 0x04), 0x00, 0x00, 0x00, 0xC3);
 		WRITE_NOP (ASLR (0x1407436E4), 6);
-		WRITE_MEMORY (ASLR (0x1407436f9), u8, 0xEB);
-
-		WRITE_NOP (ASLR (0x1409C7FEE), 2);
-		WRITE_NOP (ASLR (0x1409c8002), 2);
-		WRITE_NOP (ASLR (0x1409c800f), 2);
+		WRITE_MEMORY (ASLR (0x1407436F9), u8, 0xEB);
 
 		// Thanks dmr
 		if (skipTerminal) WRITE_NOP (ASLR (0x140744551), 5);
 
+		// Mostly stolen from openparrot
 		memset (haspBuffer, 0, 0xD40);
 		haspBuffer[0]    = 0x01;
 		haspBuffer[0x13] = 0x01;

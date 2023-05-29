@@ -32,7 +32,7 @@ openConfig (const char *configFilePath) {
 }
 
 toml_table_t *
-openConfigSection (toml_table_t *config, char *sectionName) {
+openConfigSection (toml_table_t *config, const char *sectionName) {
 	toml_table_t *section = toml_table_in (config, sectionName);
 	if (!section) {
 		printWarning ("%s (%s): cannot find section\n", __func__, sectionName);
@@ -43,7 +43,7 @@ openConfigSection (toml_table_t *config, char *sectionName) {
 }
 
 bool
-readConfigBool (toml_table_t *table, char *key, bool notFoundValue) {
+readConfigBool (toml_table_t *table, const char *key, bool notFoundValue) {
 	toml_datum_t data = toml_bool_in (table, key);
 	if (!data.ok) return notFoundValue;
 
@@ -51,7 +51,7 @@ readConfigBool (toml_table_t *table, char *key, bool notFoundValue) {
 }
 
 int64_t
-readConfigInt (toml_table_t *table, char *key, int64_t notFoundValue) {
+readConfigInt (toml_table_t *table, const char *key, int64_t notFoundValue) {
 	toml_datum_t data = toml_int_in (table, key);
 	if (!data.ok) return notFoundValue;
 
@@ -59,7 +59,7 @@ readConfigInt (toml_table_t *table, char *key, int64_t notFoundValue) {
 }
 
 char *
-readConfigString (toml_table_t *table, char *key, char *notFoundValue) {
+readConfigString (toml_table_t *table, const char *key, char *notFoundValue) {
 	toml_datum_t data = toml_string_in (table, key);
 	if (!data.ok) return notFoundValue;
 
