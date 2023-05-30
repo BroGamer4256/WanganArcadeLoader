@@ -1,4 +1,4 @@
-project('WanganArcadeLoader', 'c', 'cpp', 'nasm', version: '1.0.0')
+project('WanganArcadeLoader', 'c', 'cpp', version: '1.0.0')
 warning_level = 3
 debug = true
 optimization = 3
