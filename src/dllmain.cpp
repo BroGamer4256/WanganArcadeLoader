@@ -5,6 +5,20 @@
 bool isTerminal   = false;
 HWND windowHandle = 0;
 
+typedef void (*callbackTouch) (i32, i32, u8[168], u64);
+
+bool waitingForTouch;
+callbackTouch touchCallback;
+u64 touchData;
+char accessCode[21] = "00000000000000000001";
+char chipId[33]     = "00000000000000000000000000000001";
+u8 cardData[168]    = {0x01, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x92, 0x2E, 0x58, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                       0x7F, 0x5C, 0x97, 0x44, 0xF0, 0x88, 0x04, 0x00, 0x43, 0x26, 0x2C, 0x33, 0x00, 0x04, 0x06, 0x10, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+                       0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00, 0x00, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30,
+                       0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00,
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x42, 0x47, 0x49, 0x43, 0x36, 0x00, 0x00, 0xFA, 0xE9, 0x69, 0x00, 0xF6, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
 #pragma pack(8)
 struct string {
 	union {
@@ -115,18 +129,21 @@ const char *
 BngRwGetVersion () {
 	return "WAL v0.0.1";
 }
-typedef i32 (*callbackAttach) (i32, i32, i32 *);
-typedef void (*callbackTouch) (i32, i32, u8[168], u64);
 u64
-BngRwAttach (i32 a1, char *a2, i32 a3, i32 a4, callbackAttach callback, i32 *a6) {
+BngRwAttach (i32 a1, char *a2, i32 a3, i32 a4, void *callback, i32 *a6) {
 	return 1;
 }
 i32
 BngRwReqWaitTouch (u32 a1, i32 a2, u32 a3, callbackTouch callback, u64 a5) {
+	waitingForTouch = true;
+	touchCallback   = callback;
+	touchData       = a5;
 	return 1;
 }
-void
-BngRwInit () {}
+i32
+BngRwInit () {
+	return 0;
+}
 }
 
 HOOK (u64, IoOpen, ASLR (0x140AAACB0), u64 a1, string *filePath, i32 a3, i32 a4) {
@@ -284,8 +301,21 @@ Keybindings BrakeBinding{.buttons = {SDL_CONTROLLER_BUTTON_B}, .axis = {SDL_AXIS
 Keybindings WheelLeftBinding{.axis = {SDL_AXIS_LEFT_LEFT}};
 Keybindings WheelRightBinding{.axis = {SDL_AXIS_LEFT_RIGHT}};
 
+Keybindings CardInsertBinding{.keycodes = {"P"}};
+
 HOOK (bool, WAJVOpen, ASLR (0x1400169C0), const char *jvsComPath) { return 1; }
 HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
+	if (waitingForTouch) {
+		bool hasInserted = false;
+		if (IsButtonTapped (CardInsertBinding)) {
+			if (!hasInserted) {
+				memcpy (cardData + 0x2C, chipId, 33);
+				memcpy (cardData + 0x50, accessCode, 21);
+				touchCallback (0, 0, cardData, touchData);
+			}
+		}
+	}
+
 	UpdatePoll (windowHandle);
 	inputData->Test      = IsButtonTapped (TestBinding) ? !inputData->Test : inputData->Test;
 	inputData->Service   = IsButtonDown (ServiceBinding);
@@ -333,6 +363,7 @@ HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int s
 			SetConfigValue (config, "TEST_ENTER", &TestEnterBinding);
 
 			SetConfigValue (config, "COIN_ADD", &CoinBinding);
+			SetConfigValue (config, "CARD_INSERT", &CardInsertBinding);
 
 			SetConfigValue (config, "GEAR_NEXT", &GearNextBinding);
 			SetConfigValue (config, "GEAR_PREVIOUS", &GearPreviousBinding);
@@ -374,6 +405,8 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 			isTerminal   = readConfigBool (config, "terminal", isTerminal);
 			movies       = readConfigBool (config, "movies", movies);
 			skipTerminal = readConfigBool (config, "skipTerminal", skipTerminal);
+			strcpy_s (accessCode, readConfigString (config, "accessCode", accessCode));
+			strcpy_s (chipId, readConfigString (config, "chipId", chipId));
 		}
 
 		INSTALL_HOOK (IoOpen);

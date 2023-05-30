@@ -1,3 +1,5 @@
 terminal = false
 movies = true
 skipTerminal = true
+accessCode = "00000000000000000001"
+chipId = "00000000000000000000000000000001"
