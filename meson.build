@@ -26,7 +26,7 @@ add_project_link_arguments(
 
 minhook = subproject('minhook')
 tomlc99 = subproject('tomlc99')
-sdl2 = subproject('sdl2', default_options: ['default_library=static'])
+sdl2 = subproject('sdl2', default_options: ['default_library=static', 'test=false', 'use_render=disabled'])
 
 library(
 	'bngrw',
