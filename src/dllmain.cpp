@@ -99,6 +99,10 @@ i32
 BngRwReqSendUrl () {
 	return 1;
 }
+i32
+BngRwReqSendUrlTo () {
+	return 1;
+}
 u64
 BngRwReqSetLedPower () {
 	return 0;

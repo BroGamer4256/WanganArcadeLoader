@@ -66,7 +66,7 @@ void DisposePoll ();
 ConfigValue StringToConfigEnum (const char *value);
 void SetConfigValue (toml_table_t *table, const char *key, Keybindings *keybind);
 InternalButtonState GetInternalButtonState (Keybindings bindings);
-void SetRumble (int left, int right);
+void SetRumble (int left, int right, int length);
 
 bool KeyboardIsDown (uint8_t keycode);
 bool KeyboardIsUp (uint8_t keycode);

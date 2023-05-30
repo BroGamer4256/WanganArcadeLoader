@@ -160,12 +160,10 @@ InitializePoll (HWND windowHandle) {
 		if (!SDL_IsGameController (i)) continue;
 
 		SDL_GameController *controller = SDL_GameControllerOpen (i);
-
 		if (!controller) {
 			printWarning ("Could not open gamecontroller %s: %s\n", SDL_GameControllerNameForIndex (i), SDL_GetError ());
 			continue;
 		}
-
 		controllers[i] = controller;
 	}
 
@@ -199,18 +197,15 @@ UpdatePoll (HWND windowHandle) {
 			if (!SDL_IsGameController (event.cdevice.which)) break;
 
 			controller = SDL_GameControllerOpen (event.cdevice.which);
-
 			if (!controller) {
 				printError ("%s (): Could not open gamecontroller %s: %s\n", __func__, SDL_GameControllerNameForIndex (event.cdevice.which), SDL_GetError ());
 				continue;
 			}
-
 			controllers[event.cdevice.which] = controller;
 			break;
 		case SDL_CONTROLLERDEVICEREMOVED:
 			if (!SDL_IsGameController (event.cdevice.which)) break;
 			SDL_GameControllerClose (controllers[event.cdevice.which]);
-
 			break;
 		case SDL_MOUSEWHEEL:
 			if (event.wheel.y > 0) currentMouseState.ScrolledUp = true;
@@ -333,11 +328,11 @@ GetInternalButtonState (Keybindings bindings) {
 }
 
 void
-SetRumble (int left, int right) {
+SetRumble (int left, int right, int length) {
 	for (int i = 0; i < COUNTOFARR (controllers); i++) {
 		if (!controllers[i] || !SDL_GameControllerHasRumble (controllers[i])) continue;
 
-		SDL_GameControllerRumble (controllers[i], left, right, 1000);
+		SDL_GameControllerRumble (controllers[i], left, right, length);
 	}
 }
 
