@@ -301,7 +301,7 @@ Keybindings BrakeBinding{.buttons = {SDL_CONTROLLER_BUTTON_B}, .axis = {SDL_AXIS
 Keybindings WheelLeftBinding{.axis = {SDL_AXIS_LEFT_LEFT}};
 Keybindings WheelRightBinding{.axis = {SDL_AXIS_LEFT_RIGHT}};
 
-Keybindings CardInsertBinding{.keycodes = {"P"}};
+Keybindings CardInsertBinding{.keycodes = {'P'}};
 
 HOOK (bool, WAJVOpen, ASLR (0x1400169C0), const char *jvsComPath) { return 1; }
 HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
