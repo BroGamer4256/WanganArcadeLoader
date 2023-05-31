@@ -272,6 +272,7 @@ HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 
 	return inputData;
 }
+
 HOOK (i32, WAJVGetStatus, ASLR (0x140017840)) { return 1; }
 HOOK (void, WAJVSetPLParm, ASLR (0x140017B50), u8 a1, u16 a2, u8 a3) {}
 HOOK (void, WAJVSetFunctionSettings, ASLR (0x140016AF0), i32 a1, i32 len, void *data) {}
@@ -390,6 +391,9 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		WRITE_NOP (ASLR (0x1407436E4), 6);
 		WRITE_MEMORY (ASLR (0x1407436F9), u8, 0xEB);
+
+		// Safenet check
+		WRITE_NOP (ASLR (0x1409C800F), 2);
 
 		// Thanks dmr
 		if (skipTerminal) WRITE_NOP (ASLR (0x140744551), 5);

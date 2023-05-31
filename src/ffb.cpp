@@ -10,8 +10,8 @@ int oldGear;
 
 void
 update () {
-	auto collisions = *(f32 *)ASLR (0x141f2526C);
-	auto speed      = *(i32 *)ASLR (0x141f2612C);
+	auto collisions = *(f32 *)ASLR (0x141F2526C);
+	auto speed      = *(i32 *)ASLR (0x141F2612C);
 	auto gear       = inputData->GetGearIndex ();
 
 	if (speed <= 0) return;
