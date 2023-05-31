@@ -42,6 +42,7 @@ library(
 		'src/dllmain.cpp',
 		'src/helpers.cpp',
 		'src/poll.cpp',
+		'src/ffb.cpp',
 	],
 	name_prefix: ''
 )
