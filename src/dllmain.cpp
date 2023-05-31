@@ -188,7 +188,7 @@ HOOK (void, DebugPrint, ASLR (0x1409BCD80), u64 a1, i32 a2, wstring *str) {
 
 HOOK (HRESULT, CreateDeviceAndSwapChain, PROC_ADDRESS ("D3D11.dll", "D3D11CreateDeviceAndSwapChain"), void *pAdapter, i32 DriverType, HMODULE Software, u32 Flags, i32 *pFeatureLevels,
       u32 FeatureLevels, u32 SDKVersion, DXGI_SWAP_CHAIN_DESC *pSwapChainDesc, void **ppSwapChain, void **ppDevice, i32 *pFeatureLevel, void **ppImmediateContext) {
-	pSwapChainDesc->Windowed = true;
+	if (pSwapChainDesc) pSwapChainDesc->Windowed = true;
 	HRESULT res =
 	    originalCreateDeviceAndSwapChain (pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion, pSwapChainDesc, ppSwapChain, ppDevice, pFeatureLevel, ppImmediateContext);
 	return res;
