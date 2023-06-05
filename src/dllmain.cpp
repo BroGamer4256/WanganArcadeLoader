@@ -287,7 +287,7 @@ HOOK (i32, ShowMouse, PROC_ADDRESS ("user32.dll", "ShowCursor"), i32 show) { ret
 HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int styleEx, wchar_t *className, wchar_t *windowName, int style, int x, int y, int width, int height, HWND parent,
       void *menu, void *instance, void *param) {
 	HWND handle = originalWindowCreateW (styleEx, className, windowName, style, x, y, width, height, parent, menu, instance, param);
-	if (windowHandle == 0) {
+	if (windowHandle == 0 && wcscmp (className, L"class_name") == 0) {
 		toml_table_t *config = openConfig (configPath ("keyconfig.toml"));
 		if (config) {
 			SetConfigValue (config, "TEST", &TestBinding);
@@ -325,6 +325,14 @@ HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int s
 
 HOOK (bool, MoviePlayerOpen, ASLR (0x1407A7040), void *a1, int movieId) { return true; }
 
+extern "C" {
+i32 xRes  = 1360;
+i32 yRes  = 768;
+f32 ratio = 1.0;
+HOOK (void, RenderShape, ASLR (0x140A12CEE));
+HOOK (void, RenderText, ASLR (0x140A15FDB));
+}
+
 BOOL
 DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 	if (reason == DLL_PROCESS_ATTACH) {
@@ -341,8 +349,16 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 			movies       = readConfigBool (config, "movies", movies);
 			skipTerminal = readConfigBool (config, "skipTerminal", skipTerminal);
 			windowed     = readConfigBool (config, "windowed", windowed);
+			auto res     = openConfigSection (config, "res");
+			if (res) {
+				xRes  = readConfigInt (res, "x", xRes);
+				yRes  = readConfigInt (res, "y", yRes);
+				ratio = 768.0 / (f32)yRes;
+			}
 			strcpy_s (accessCode, readConfigString (config, "accessCode", accessCode));
 			strcpy_s (chipId, readConfigString (config, "chipId", chipId));
+
+			toml_free (config);
 		}
 
 		INSTALL_HOOK (IoOpen);
@@ -407,6 +423,16 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 			crc += haspBuffer[0xD00 + i];
 		haspBuffer[0xD3E] = crc;
 		haspBuffer[0xD3F] = haspBuffer[0xD3E] ^ 0xFF;
+
+		// Internal res
+		WRITE_MEMORY (ASLR (0x14021781B), i32, xRes);
+		WRITE_MEMORY (ASLR (0x140217821), i32, yRes);
+
+		WRITE_MEMORY (ASLR (0x140C6E941), i32, xRes);
+		WRITE_MEMORY (ASLR (0x140C6E948), i32, yRes);
+
+		INSTALL_HOOK (RenderShape);
+		INSTALL_HOOK (RenderText);
 	}
 	return TRUE;
 }

@@ -1,4 +1,5 @@
 // Adapted from https://github.com/Boomslangnz/FFBArcadePlugin
+// Licensed under GPL 3.0 which can be seen at https://github.com/Boomslangnz/FFBArcadePlugin/blob/master/LICENSE
 
 #include "dllmain.h"
 #include "helpers.h"
