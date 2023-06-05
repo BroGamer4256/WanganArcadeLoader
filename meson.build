@@ -33,10 +33,15 @@ library(
 	include_directories: [
 		'src',
 	],
-	dependencies : [
-		minhook.get_variable('minhook_dep'),
-		tomlc99.get_variable('tomlc99_dep'),
-		sdl2.get_variable('sdl2_dep'),
+	link_with: [
+		minhook.get_variable('minhook_lib'),
+		tomlc99.get_variable('tomlc99_lib'),
+		sdl2.get_variable('sdl2'),
+	],
+	include_directories: [
+		minhook.get_variable('minhook_inc'),
+		tomlc99.get_variable('tomlc99_inc'),
+		sdl2.get_variable('core_inc'),
 	],
 	sources : [
 		'src/dllmain.cpp',
