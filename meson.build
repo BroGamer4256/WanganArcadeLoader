@@ -10,6 +10,7 @@ cpp = meson.get_compiler('cpp')
 add_project_arguments(
 	cpp.get_supported_arguments(
 		'-D_WIN32_WINNT=_WIN32_WINNT_WIN10',
+		'-pthread',
 	),
 	language: 'cpp',
 )
