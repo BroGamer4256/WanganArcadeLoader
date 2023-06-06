@@ -19,7 +19,8 @@ struct InputData {
 	bool GearIsRightColumn;
 	u8 unk_19C[2];
 	bool Perspective;
-	u8 unk_1A0[242];
+	bool Intrude;
+	u8 unk_1A0[241];
 	u8 Wheel;
 	u8 unk_28A[1];
 	u8 Gas;

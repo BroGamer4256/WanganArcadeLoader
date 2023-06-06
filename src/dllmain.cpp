@@ -3,6 +3,7 @@
 #include "helpers.h"
 #include "poll.h"
 #include <dxgi.h>
+#include <thread>
 
 bool isTerminal   = false;
 HWND windowHandle = 0;
