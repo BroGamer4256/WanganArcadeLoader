@@ -3,7 +3,6 @@
 #include "helpers.h"
 #include "poll.h"
 #include <dxgi.h>
-#include <thread>
 
 bool isTerminal   = false;
 HWND windowHandle = 0;
@@ -267,7 +266,6 @@ HOOK (void *, WAJVSioRead, ASLR (0x140017B10), u32 *out, i32 size) { return 0; }
 HOOK (i32, WAJVSioSetMode, ASLR (0x140017980), u8 a1, u8 a2, u8 a3, u16 a4) { return 0; }
 HOOK (i32, WAJVUpdate, ASLR (0x140016C10)) { return 1; }
 HOOK (i32, WAJVGetNodeCount, ASLR (0x140017880)) { return 1; }
-HOOK (void, Breakpoint, PROC_ADDRESS ("kernel32.dll", "DebugBreak")) {}
 HOOK (i32, ShowMouse, PROC_ADDRESS ("user32.dll", "ShowCursor"), i32 show) { return originalShowMouse (true); }
 
 HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int styleEx, wchar_t *className, wchar_t *windowName, int style, int x, int y, int width, int height, HWND parent,
@@ -385,7 +383,6 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (WAJVUpdate);
 		INSTALL_HOOK (WAJVGetNodeCount);
 
-		INSTALL_HOOK (Breakpoint);
 		INSTALL_HOOK (ShowMouse);
 		INSTALL_HOOK (WindowCreateW);
 		if (!movies) INSTALL_HOOK (MoviePlayerOpen);
