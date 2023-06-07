@@ -444,7 +444,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (RenderText);
 
 		// Card reading
-		WRITE_NOP (0x1409D7C2B, 5);
+		WRITE_NOP (ASLR (0x1409D7C2B), 5);
 	}
 	return TRUE;
 }
