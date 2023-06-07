@@ -13,7 +13,6 @@ bool waitingForTouch = false;
 bool touchFinished   = false;
 u64 touchData;
 callbackTouch touchCallback;
-i32 touchCmdId;
 
 char accessCode[21] = "00000000000000000000";
 char chipId[33]     = "00000000000000000000000000000000";
@@ -332,7 +331,6 @@ i32
 BngRwReqWaitTouch (u32 a1, i32 a2, u32 a3, callbackTouch callback, u64 a5) {
 	touchCallback   = callback;
 	touchData       = a5;
-	touchCmdId      = a1;
 	waitingForTouch = true;
 
 	if (touchFinished) {
