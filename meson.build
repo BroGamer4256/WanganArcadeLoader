@@ -4,12 +4,14 @@ debug = true
 optimization = 3
 b_lto = true
 b_pgo = 'use'
+cpp_std = 'c++20'
 
 cpp = meson.get_compiler('cpp')
 
 add_project_arguments(
 	cpp.get_supported_arguments(
 		'-D_WIN32_WINNT=_WIN32_WINNT_WIN10',
+		'-std=c++20',
 	),
 	language: 'cpp',
 )
