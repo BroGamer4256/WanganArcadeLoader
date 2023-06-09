@@ -23,7 +23,7 @@ u8 cardData[168]    = {0x01, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x0
                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x42, 0x47, 0x49, 0x43, 0x36, 0x00, 0x00, 0xFA, 0xE9, 0x69, 0x00, 0xF6, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-std::vector<std::string> modDirs;
+std::vector<std::filesystem::path> modDirs;
 
 #pragma pack(8)
 struct string {
@@ -37,6 +37,22 @@ struct string {
 	char *c_str () {
 		if (this->capacity > 15) return this->ptr;
 		else return this->data;
+	}
+
+	string (const char *in) { this->create (in, strlen (in)); }
+
+	string (const char *in, i64 len) { this->create (in, len); }
+
+	string *create (const char *in, i64 len) {
+		if (len < 16) {
+			strcpy (data, in);
+			return this;
+		}
+		ptr = (char *)malloc (len);
+		strcpy (ptr, in);
+		length   = len;
+		capacity = len;
+		return this;
 	}
 };
 
@@ -322,16 +338,15 @@ HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int s
 
 HOOK (bool, MoviePlayerOpen, ASLR (0x1407A7040), void *a1, int movieId) { return true; }
 
-FUNCTION_PTR (string *, StringInit, ASLR (0x14009D330), string *out, char *in, i64 length);
 HOOK (string *, ResolveFilePath, ASLR (0x1409F4C90), string *language, string *out, string *path) {
 	if (strncmp (path->c_str (), "sim:", 4) == 0) {
 		char *filePath = path->c_str () + 9; // remove sim:data/
 		for (auto dir : modDirs) {
-			char buf[1024];
-			strcpy (buf, dir.c_str ());
-			strcat (buf, "\\");
-			strcat (buf, filePath);
-			if (std::filesystem::exists (buf)) return StringInit (out, buf, strlen (buf));
+			std::filesystem::path modPath (dir / filePath);
+			if (std::filesystem::exists (modPath)) {
+				auto str = modPath.string ();
+				return out->create (str.c_str (), str.length () + 1);
+			}
 		}
 	}
 	return originalResolveFilePath (language, out, path);
@@ -468,7 +483,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		// Mods
 		if (std::filesystem::exists (modDir)) {
 			for (auto dir : std::filesystem::directory_iterator (modDir))
-				if (std::filesystem::is_directory (dir)) modDirs.push_back (dir.path ().string ());
+				if (std::filesystem::is_directory (dir)) modDirs.push_back (dir.path ());
 		}
 	}
 	return TRUE;
