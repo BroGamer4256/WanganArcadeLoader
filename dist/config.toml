@@ -5,3 +5,4 @@ windowed = true
 accessCode = "00000000000000000000"
 chipId = "00000000000000000000000000000000"
 res = { x = 1360, y = 768 }
+mods = "mods"

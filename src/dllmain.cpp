@@ -23,6 +23,7 @@ u8 cardData[168]    = {0x01, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x0
                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x42, 0x47, 0x49, 0x43, 0x36, 0x00, 0x00, 0xFA, 0xE9, 0x69, 0x00, 0xF6, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+std::vector<std::string> modDirs;
 
 #pragma pack(8)
 struct string {
@@ -321,6 +322,21 @@ HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int s
 
 HOOK (bool, MoviePlayerOpen, ASLR (0x1407A7040), void *a1, int movieId) { return true; }
 
+FUNCTION_PTR (string *, StringInit, ASLR (0x14009D330), string *out, char *in, i64 length);
+HOOK (string *, ResolveFilePath, ASLR (0x1409F4C90), string *language, string *out, string *path) {
+	if (strncmp (path->c_str (), "sim:", 4) == 0) {
+		char *filePath = path->c_str () + 9; // remove sim:data/
+		for (auto dir : modDirs) {
+			char buf[1024];
+			strcpy (buf, dir.c_str ());
+			strcat (buf, "\\");
+			strcat (buf, filePath);
+			if (std::filesystem::exists (buf)) return StringInit (out, buf, strlen (buf));
+		}
+	}
+	return originalResolveFilePath (language, out, path);
+}
+
 extern "C" {
 i32 xRes  = 1360;
 i32 yRes  = 768;
@@ -329,14 +345,15 @@ HOOK (void, RenderShape, ASLR (0x140A12CEE));
 HOOK (void, RenderText, ASLR (0x140A15FDB));
 i32
 BngRwReqWaitTouch (u32 a1, i32 a2, u32 a3, callbackTouch callback, u64 a5) {
-	touchCallback   = callback;
-	touchData       = a5;
-	waitingForTouch = true;
-
 	if (touchFinished) {
 		touchFinished = false;
 		return 1;
 	}
+
+	touchCallback   = callback;
+	touchData       = a5;
+	waitingForTouch = true;
+
 	return -1;
 }
 }
@@ -352,6 +369,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		bool movies          = true;
 		bool skipTerminal    = true;
 		bool windowed        = true;
+		char modDir[1024]    = "mods";
 		if (config) {
 			isTerminal   = readConfigBool (config, "terminal", isTerminal);
 			movies       = readConfigBool (config, "movies", movies);
@@ -365,6 +383,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 			}
 			strcpy_s (accessCode, readConfigString (config, "accessCode", accessCode));
 			strcpy_s (chipId, readConfigString (config, "chipId", chipId));
+			strcpy_s (modDir, readConfigString (config, "mods", modDir));
 
 			toml_free (config);
 		}
@@ -397,6 +416,8 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (ShowMouse);
 		INSTALL_HOOK (WindowCreateW);
 		if (!movies) INSTALL_HOOK (MoviePlayerOpen);
+
+		INSTALL_HOOK (ResolveFilePath);
 
 		// Display all debug print messages
 		WRITE_MEMORY (ASLR (0x1409BD193), u8, 0xEB);
@@ -443,6 +464,12 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		// Card reading
 		WRITE_NOP (ASLR (0x1409D7C2B), 5);
+
+		// Mods
+		if (std::filesystem::exists (modDir)) {
+			for (auto dir : std::filesystem::directory_iterator (modDir))
+				if (std::filesystem::is_directory (dir)) modDirs.push_back (dir.path ().string ());
+		}
 	}
 	return TRUE;
 }
