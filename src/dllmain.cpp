@@ -5,6 +5,7 @@
 #include <dxgi.h>
 
 bool isTerminal   = false;
+bool rumble       = true;
 HWND windowHandle = 0;
 
 typedef void (*callbackTouch) (i32, i32, u8[168], u64);
@@ -281,7 +282,7 @@ HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 	auto right             = IsButtonDown (WheelRightBinding) * INT8_MAX;
 	inputData->Wheel       = INT8_MAX - left + right;
 
-	ffb::update ();
+	if (rumble) ffb::update ();
 
 	return inputData;
 }
@@ -390,6 +391,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 			movies       = readConfigBool (config, "movies", movies);
 			skipTerminal = readConfigBool (config, "skipTerminal", skipTerminal);
 			windowed     = readConfigBool (config, "windowed", windowed);
+			rumble       = readConfigBool (config, "rumble", rumble);
 			auto res     = openConfigSection (config, "res");
 			if (res) {
 				xRes  = readConfigInt (res, "x", xRes);
