@@ -214,7 +214,7 @@ UpdatePoll (HWND windowHandle) {
 		case SDL_CONTROLLERBUTTONUP:
 		case SDL_CONTROLLERBUTTONDOWN: currentControllerButtonsState[event.cbutton.button] = event.cbutton.state; break;
 		case SDL_CONTROLLERAXISMOTION:
-			if (event.caxis.value > 1000) {
+			if (event.caxis.value > 1) {
 				switch (event.caxis.axis) {
 				case SDL_CONTROLLER_AXIS_LEFTX: currentControllerAxisState.LeftRight = (float)event.caxis.value / 32767; break;
 				case SDL_CONTROLLER_AXIS_LEFTY: currentControllerAxisState.LeftDown = (float)event.caxis.value / 32767; break;
@@ -223,7 +223,7 @@ UpdatePoll (HWND windowHandle) {
 				case SDL_CONTROLLER_AXIS_TRIGGERLEFT: currentControllerAxisState.LTriggerDown = (float)event.caxis.value / 32767; break;
 				case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: currentControllerAxisState.RTriggerDown = (float)event.caxis.value / 32767; break;
 				}
-			} else if (event.caxis.value < -1000) {
+			} else if (event.caxis.value < -1) {
 				switch (event.caxis.axis) {
 				case SDL_CONTROLLER_AXIS_LEFTX: currentControllerAxisState.LeftLeft = (float)event.caxis.value / -32768; break;
 				case SDL_CONTROLLER_AXIS_LEFTY: currentControllerAxisState.LeftUp = (float)event.caxis.value / -32768; break;
