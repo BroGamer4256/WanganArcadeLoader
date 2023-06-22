@@ -374,9 +374,9 @@ createCard () {
 	char buf[64]                   = {0};
 	srand (time (0));
 
-	std::generate (buf, buf + 20, [=] () { return hexCharacterTable[rand () % 10]; });
+	std::generate (buf, buf + 20, [&] () { return hexCharacterTable[rand () % 10]; });
 	WritePrivateProfileStringA ("card", "accessCode", buf, ".\\card.ini");
-	std::generate (buf, buf + 32, [=] () { return hexCharacterTable[rand () % 16]; });
+	std::generate (buf, buf + 32, [&] () { return hexCharacterTable[rand () % 16]; });
 	WritePrivateProfileStringA ("card", "chipId", buf, ".\\card.ini");
 }
 

@@ -171,6 +171,8 @@ InitializePoll (HWND windowHandle) {
 	if (window != NULL) SDL_SetWindowResizable (window, SDL_TRUE);
 	else printError ("SDL_CreateWindowFrom (windowHandle): %s\n", SDL_GetError ());
 
+	atexit (DisposePoll);
+
 	return hasRumble;
 }
 
