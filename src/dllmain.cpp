@@ -371,13 +371,12 @@ BngRwReqWaitTouch (u32 a1, i32 a2, u32 a3, callbackTouch callback, u64 a5) {
 void
 createCard () {
 	const char hexCharacterTable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+	char buf[64]                   = {0};
 	srand (time (0));
-	char buf[1024];
+
 	std::generate (buf, buf + 20, [=] () { return hexCharacterTable[rand () % 10]; });
-	buf[21] = 0;
 	WritePrivateProfileStringA ("card", "accessCode", buf, ".\\card.ini");
 	std::generate (buf, buf + 32, [=] () { return hexCharacterTable[rand () % 16]; });
-	buf[33] = 0;
 	WritePrivateProfileStringA ("card", "chipId", buf, ".\\card.ini");
 }
 
