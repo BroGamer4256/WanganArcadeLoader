@@ -249,7 +249,6 @@ Keybindings WheelRightBinding{.axis = {SDL_AXIS_LEFT_RIGHT}};
 
 Keybindings CardInsertBinding{.keycodes = {'P'}};
 
-HOOK (bool, WAJVOpen, ASLR (0x1400169C0), const char *jvsComPath) { return 1; }
 HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 	UpdatePoll (windowHandle);
 
@@ -264,9 +263,9 @@ HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 	inputData->Test      = IsButtonTapped (TestBinding) ? !inputData->Test : inputData->Test;
 	inputData->Service   = IsButtonDown (ServiceBinding);
 	inputData->Start     = IsButtonDown (StartBinding);
-	inputData->TestUp    = IsButtonTapped (TestUpBinding);
-	inputData->TestDown  = IsButtonTapped (TestDownBinding);
-	inputData->TestEnter = IsButtonTapped (TestEnterBinding);
+	inputData->TestUp    = IsButtonDown (TestUpBinding);
+	inputData->TestDown  = IsButtonDown (TestDownBinding);
+	inputData->TestEnter = IsButtonDown (TestEnterBinding);
 
 	inputData->Coin = IsButtonTapped (CoinBinding);
 
@@ -274,8 +273,8 @@ HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 	for (auto i = 0; i < COUNTOFARR (GearBindings); i++)
 		if (IsButtonTapped (GearBindings[i])) inputData->SetGearIndex (i);
 
-	inputData->Perspective = IsButtonTapped (PerspectiveBinding);
-	inputData->Intrude     = IsButtonTapped (IntrudeBinding);
+	inputData->Perspective = IsButtonDown (PerspectiveBinding);
+	inputData->Intrude     = IsButtonDown (IntrudeBinding);
 	inputData->Gas         = IsButtonDown (GasBinding) * INT8_MAX;
 	inputData->Brake       = IsButtonDown (BrakeBinding) * INT8_MAX;
 	auto left              = IsButtonDown (WheelLeftBinding) * INT8_MAX;
@@ -287,13 +286,8 @@ HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 	return inputData;
 }
 
+HOOK (bool, WAJVOpen, ASLR (0x1400169C0), const char *jvsComPath) { return 1; }
 HOOK (i32, WAJVGetStatus, ASLR (0x140017840)) { return 1; }
-HOOK (void, WAJVSetPLParm, ASLR (0x140017B50), u8 a1, u16 a2, u8 a3) {}
-HOOK (void, WAJVSetFunctionSettings, ASLR (0x140016AF0), i32 a1, i32 len, void *data) {}
-HOOK (bool, WAJVSetOutput, ASLR (0x1400178B0), u32 index, void *output) { return 1; }
-HOOK (void *, WAJVSioRead, ASLR (0x140017B10), u32 *out, i32 size) { return 0; }
-HOOK (i32, WAJVSioSetMode, ASLR (0x140017980), u8 a1, u8 a2, u8 a3, u16 a4) { return 0; }
-HOOK (i32, WAJVUpdate, ASLR (0x140016C10)) { return 1; }
 HOOK (i32, WAJVGetNodeCount, ASLR (0x140017880)) { return 1; }
 HOOK (i32, ShowMouse, PROC_ADDRESS ("user32.dll", "ShowCursor"), i32 show) { return originalShowMouse (true); }
 
@@ -422,12 +416,6 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (WAJVOpen);
 		INSTALL_HOOK (WAJVGetInput);
 		INSTALL_HOOK (WAJVGetStatus);
-		INSTALL_HOOK (WAJVSetPLParm);
-		INSTALL_HOOK (WAJVSetFunctionSettings);
-		INSTALL_HOOK (WAJVSetOutput);
-		INSTALL_HOOK (WAJVSioRead);
-		INSTALL_HOOK (WAJVSioSetMode);
-		INSTALL_HOOK (WAJVUpdate);
 		INSTALL_HOOK (WAJVGetNodeCount);
 
 		INSTALL_HOOK (ShowMouse);
