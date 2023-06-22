@@ -368,6 +368,19 @@ BngRwReqWaitTouch (u32 a1, i32 a2, u32 a3, callbackTouch callback, u64 a5) {
 }
 }
 
+void
+createCard () {
+	const char hexCharacterTable[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+	srand (time (0));
+	char buf[1024];
+	std::generate (buf, buf + 20, [=] () { return hexCharacterTable[rand () % 10]; });
+	buf[21] = 0;
+	WritePrivateProfileStringA ("card", "accessCode", buf, ".\\card.ini");
+	std::generate (buf, buf + 32, [=] () { return hexCharacterTable[rand () % 16]; });
+	buf[33] = 0;
+	WritePrivateProfileStringA ("card", "chipId", buf, ".\\card.ini");
+}
+
 BOOL
 DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 	if (reason == DLL_PROCESS_ATTACH) {
@@ -392,12 +405,13 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 				yRes  = readConfigInt (res, "y", yRes);
 				ratio = 768.0 / (f32)yRes;
 			}
-			strcpy_s (accessCode, readConfigString (config, "accessCode", accessCode));
-			strcpy_s (chipId, readConfigString (config, "chipId", chipId));
 			strcpy_s (modDir, readConfigString (config, "mods", modDir));
 
 			toml_free (config);
 		}
+		if (!std::filesystem::exists (".\\card.ini")) createCard ();
+		GetPrivateProfileStringA ("card", "accessCode", accessCode, accessCode, 21, ".\\card.ini");
+		GetPrivateProfileStringA ("card", "chipId", chipId, chipId, 33, ".\\card.ini");
 
 		INSTALL_HOOK (IoOpen);
 		INSTALL_HOOK (DbCreate);
