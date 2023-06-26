@@ -25,6 +25,8 @@ u8 cardData[168]    = {0x01, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x0
                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 std::vector<std::filesystem::path> modDirs;
+std::vector<HMODULE> plugins;
+typedef void waitTouchEvent (callbackTouch, u64);
 
 #pragma pack(8)
 struct string {
@@ -283,6 +285,11 @@ HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 
 	if (rumble) ffb::update ();
 
+	for (auto plugin : plugins) {
+		auto updateEvent = GetProcAddress (plugin, "Update");
+		if (updateEvent) updateEvent ();
+	}
+
 	return inputData;
 }
 
@@ -327,6 +334,11 @@ HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int s
 		}
 		windowHandle = handle;
 		InitializePoll (handle);
+
+		for (auto plugin : plugins) {
+			auto initEvent = GetProcAddress (plugin, "Init");
+			if (initEvent) initEvent ();
+		}
 	}
 	return handle;
 }
@@ -353,6 +365,13 @@ i32 yRes  = 768;
 f32 ratio = 1.0;
 HOOK (void, RenderShape, ASLR (0x140A12CEE));
 HOOK (void, RenderText, ASLR (0x140A15FDB));
+void
+pluginCallback (i32 a1, i32 a2, u8 a3[168], u64 data) {
+	touchCallback (a1, a2, a3, data);
+	waitingForTouch = false;
+	touchFinished   = true;
+}
+
 i32
 BngRwReqWaitTouch (u32 a1, i32 a2, u32 a3, callbackTouch callback, u64 a5) {
 	if (touchFinished) {
@@ -363,6 +382,11 @@ BngRwReqWaitTouch (u32 a1, i32 a2, u32 a3, callbackTouch callback, u64 a5) {
 	touchCallback   = callback;
 	touchData       = a5;
 	waitingForTouch = true;
+
+	for (auto plugin : plugins) {
+		auto touchEvent = GetProcAddress (plugin, "WaitTouch");
+		if (touchEvent) ((waitTouchEvent *)touchEvent) (pluginCallback, a5);
+	}
 
 	return -1;
 }
@@ -487,6 +511,30 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		if (std::filesystem::exists (modDir)) {
 			for (auto dir : std::filesystem::directory_iterator (modDir))
 				if (std::filesystem::is_directory (dir)) modDirs.push_back (dir.path ());
+		}
+
+		char path[MAX_PATH];
+		GetModuleFileNameA (NULL, path, MAX_PATH);
+		*strrchr (path, '\\') = 0;
+		SetCurrentDirectoryA (path);
+		strcat (path, "plugins");
+
+		if (std::filesystem::exists (path)) {
+			for (auto entry : std::filesystem::directory_iterator (path)) {
+				if (entry.path ().extension () == ".dll") {
+					auto name       = entry.path ().string ();
+					HMODULE hModule = LoadLibraryA (name.c_str ());
+					if (!hModule) {
+						char buf[128];
+						sprintf (buf, "Failed to load plugin %s", name.c_str ());
+						MessageBoxA (0, buf, name.c_str (), MB_ICONERROR);
+					} else {
+						plugins.push_back (hModule);
+						auto exitEvent = GetProcAddress (hModule, "Exit");
+						if (exitEvent) atexit ((void (*) ())exitEvent);
+					}
+				}
+			}
 		}
 	}
 	return TRUE;
