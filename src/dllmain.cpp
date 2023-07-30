@@ -302,7 +302,8 @@ HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int s
       void *menu, void *instance, void *param) {
 	HWND handle = originalWindowCreateW (styleEx, className, windowName, style, x, y, width, height, parent, menu, instance, param);
 	if (windowHandle == 0 && wcscmp (className, L"class_name") == 0) {
-		toml_table_t *config = openConfig (configPath ("keyconfig.toml"));
+		auto configPath      = std::filesystem::current_path () / std::filesystem::path ("keyconfig.toml");
+		toml_table_t *config = openConfig (configPath);
 		if (config) {
 			SetConfigValue (config, "TEST", &TestBinding);
 			SetConfigValue (config, "SERVICE", &ServiceBinding);
@@ -379,7 +380,7 @@ HOOK (POINT *, GetTouchPos, ASLR (0x140A1A5E0), void *a1, POINT *out) {
 	auto width  = rect.right - rect.left;
 	auto height = rect.bottom - rect.top;
 
-	out->x = (f32)pos.x / height * 1360;
+	out->x = (f32)pos.x / width * 1360;
 	out->y = (f32)pos.y / height * 768;
 
 	return out;
@@ -451,7 +452,8 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		AllocConsole ();
 		freopen ("CONOUT$", "w", stdout);
 
-		toml_table_t *config = openConfig (configPath ((char *)"config.toml"));
+		auto configPath      = std::filesystem::current_path () / std::filesystem::path ("config.toml");
+		toml_table_t *config = openConfig (configPath);
 		bool movies          = true;
 		bool skipTerminal    = true;
 		bool windowed        = true;

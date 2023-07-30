@@ -3,28 +3,29 @@
 
 void *consoleHandle = 0;
 
-char *
-configPath (const char *name) {
-	static char buffer[MAX_PATH];
-	GetModuleFileNameA (NULL, buffer, MAX_PATH);
-	*(strrchr (buffer, '\\') + 1) = 0;
-	strcat_s (buffer, MAX_PATH, name);
-	return buffer;
-}
-
 toml_table_t *
-openConfig (const char *configFilePath) {
-	FILE *file = fopen (configFilePath, "r");
-	if (!file) {
-		printWarning ("%s (%s): cannot open file\n", __func__, configFilePath);
+openConfig (std::filesystem::path path) {
+	if (!std::filesystem::exists (path) || !path.has_filename ()) {
+		printWarning ("%s (%s): file does not exist\n", __func__, path.string ().c_str ());
 		return 0;
 	}
+	std::ifstream stream (path);
+	if (!stream.is_open ()) {
+		printWarning ("%s (%s): could not open\n", __func__, path.string ().c_str ());
+		return 0;
+	}
+	u64 length = stream.tellg ();
+
+	char *buf = (char *)calloc (length + 1, sizeof (char));
+	stream.get (buf, length);
+
 	char errorbuf[200];
-	toml_table_t *config = toml_parse_file (file, errorbuf, 200);
-	fclose (file);
+	toml_table_t *config = toml_parse (buf, errorbuf, 200);
+	stream.close ();
+	free (buf);
 
 	if (!config) {
-		printWarning ("%s (%s): %s\n", __func__, configFilePath, errorbuf);
+		printWarning ("%s (%s): %s\n", __func__, path.string ().c_str (), errorbuf);
 		return 0;
 	}
 

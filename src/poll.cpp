@@ -152,7 +152,8 @@ InitializePoll (HWND windowHandle) {
 		}
 	}
 
-	if (SDL_GameControllerAddMappingsFromFile (configPath ("gamecontrollerdb.txt")) == -1) printError ("%s (): Cannot read gamecontrollerdb.txt\n", __func__);
+	auto configPath = std::filesystem::current_path () / std::filesystem::path ("gamecontrollerdb.txt");
+	if (SDL_GameControllerAddMappingsFromFile (configPath.string ().c_str ()) == -1) printError ("%s (): Cannot read gamecontrollerdb.txt\n", __func__);
 	SDL_GameControllerEventState (SDL_ENABLE);
 	SDL_JoystickEventState (SDL_ENABLE);
 
