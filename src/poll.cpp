@@ -191,6 +191,8 @@ UpdatePoll (HWND windowHandle) {
 	currentMouseState.ScrolledUp   = false;
 	currentMouseState.ScrolledDown = false;
 
+	GetCursorPos (&currentMouseState.Position);
+
 	SDL_Event event;
 	SDL_GameController *controller;
 	while (SDL_PollEvent (&event) != 0) {

@@ -359,6 +359,40 @@ HOOK (string *, ResolveFilePath, ASLR (0x1409F4C90), string *language, string *o
 	return originalResolveFilePath (language, out, path);
 }
 
+HOOK (void, TouchScreenSend, ASLR (0x1409D3910), void *a1, void *a2, u64 data, void *a4) {}
+
+u8 touchScreenByteUnk = 0x30;
+HOOK (void, TouchScreenRecv, ASLR (0x1409DD130), u64 a1, i32 *a2) {
+	*a2                  = 1;
+	*(u8 **)(a1 + 0x128) = &touchScreenByteUnk;
+	*(u64 *)(a1 + 0x130) = *(u64 *)(a1 + 0x128) + 1;
+
+	*(u8 *)(a1 + 0x178) = KeyboardIsDown (VK_LBUTTON);
+	*(u8 *)(a1 + 0x179) = KeyboardIsUp (VK_LBUTTON);
+}
+
+HOOK (POINT *, GetTouchPos, ASLR (0x140A1A5E0), void *a1, POINT *out) {
+	RECT rect;
+	auto pos = GetMousePosition ();
+	GetClientRect (windowHandle, &rect);
+
+	out->x = (f32)pos.x / (rect.right - rect.left) * 1360;
+	out->y = (f32)pos.y / (rect.bottom - rect.top) * 768;
+
+	return out;
+}
+
+HOOK (bool, GetTouch, ASLR (0x140714BB0), void *a1, i32 *x, i32 *y) {
+	RECT rect;
+	auto pos = GetMousePosition ();
+	GetClientRect (windowHandle, &rect);
+
+	*x = (f32)pos.x / (rect.right - rect.left) * 1360;
+	*y = (f32)pos.y / (rect.bottom - rect.top) * 768;
+
+	return KeyboardIsDown (VK_LBUTTON);
+}
+
 extern "C" {
 i32 xRes  = 1360;
 i32 yRes  = 768;
@@ -461,6 +495,12 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		INSTALL_HOOK (ResolveFilePath);
 
+		INSTALL_HOOK (TouchScreenSend);
+		INSTALL_HOOK (TouchScreenRecv);
+
+		INSTALL_HOOK (GetTouchPos);
+		INSTALL_HOOK (GetTouch);
+
 		// Display all debug print messages
 		WRITE_MEMORY (ASLR (0x1409BD193), u8, 0xEB);
 
@@ -483,6 +523,10 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		// Thanks dmr
 		if (skipTerminal) WRITE_NOP (ASLR (0x140744551), 5);
+
+		// Terminal touch screen
+		WRITE_NOP (ASLR (0x1409DEB50), 5);
+		WRITE_NOP (ASLR (0x1409DEC76), 5);
 
 		// Mostly stolen from openparrot
 		memset (haspBuffer, 0, 0xD40);
