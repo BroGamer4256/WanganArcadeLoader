@@ -302,7 +302,7 @@ HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int s
       void *menu, void *instance, void *param) {
 	HWND handle = originalWindowCreateW (styleEx, className, windowName, style, x, y, width, height, parent, menu, instance, param);
 	if (windowHandle == 0 && wcscmp (className, L"class_name") == 0) {
-		auto configPath      = std::filesystem::current_path () / std::filesystem::path ("keyconfig.toml");
+		auto configPath      = std::filesystem::current_path () / "keyconfig.toml";
 		toml_table_t *config = openConfig (configPath);
 		if (config) {
 			SetConfigValue (config, "TEST", &TestBinding);
@@ -452,7 +452,12 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		AllocConsole ();
 		freopen ("CONOUT$", "w", stdout);
 
-		auto configPath      = std::filesystem::current_path () / std::filesystem::path ("config.toml");
+		wchar_t path[MAX_PATH];
+		GetModuleFileNameW (NULL, path, MAX_PATH);
+		*wcsrchr (path, '\\') = 0;
+		SetCurrentDirectoryW (path);
+
+		auto configPath      = std::filesystem::current_path () / "config.toml";
 		toml_table_t *config = openConfig (configPath);
 		bool movies          = true;
 		bool skipTerminal    = true;
@@ -565,14 +570,10 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 				if (std::filesystem::is_directory (dir)) modDirs.push_back (dir.path ());
 		}
 
-		char path[MAX_PATH];
-		GetModuleFileNameA (NULL, path, MAX_PATH);
-		*strrchr (path, '\\') = 0;
-		SetCurrentDirectoryA (path);
-		strcat (path, "plugins");
+		auto pluginPath = std::filesystem::current_path () / "plugins";
 
-		if (std::filesystem::exists (path)) {
-			for (auto entry : std::filesystem::directory_iterator (path)) {
+		if (std::filesystem::exists (pluginPath)) {
+			for (auto entry : std::filesystem::directory_iterator (pluginPath)) {
 				if (entry.path ().extension () == ".dll") {
 					auto name       = entry.path ().string ();
 					HMODULE hModule = LoadLibraryA (name.c_str ());

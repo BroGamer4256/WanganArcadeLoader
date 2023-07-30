@@ -14,10 +14,12 @@ openConfig (std::filesystem::path path) {
 		printWarning ("%s (%s): could not open\n", __func__, path.string ().c_str ());
 		return 0;
 	}
-	u64 length = stream.tellg ();
+	stream.seekg (0, stream.end);
+	u32 length = stream.tellg ();
+	stream.seekg (0, stream.beg);
 
 	char *buf = (char *)calloc (length + 1, sizeof (char));
-	stream.get (buf, length);
+	stream.read (buf, length);
 
 	char errorbuf[200];
 	toml_table_t *config = toml_parse (buf, errorbuf, 200);
