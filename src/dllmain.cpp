@@ -376,8 +376,11 @@ HOOK (POINT *, GetTouchPos, ASLR (0x140A1A5E0), void *a1, POINT *out) {
 	auto pos = GetMousePosition ();
 	GetClientRect (windowHandle, &rect);
 
-	out->x = (f32)pos.x / (rect.right - rect.left) * 1360;
-	out->y = (f32)pos.y / (rect.bottom - rect.top) * 768;
+	auto width  = rect.right - rect.left;
+	auto height = rect.bottom - rect.top;
+
+	out->x = (f32)pos.x / height * 1360;
+	out->y = (f32)pos.y / height * 768;
 
 	return out;
 }
@@ -387,8 +390,11 @@ HOOK (bool, GetTouch, ASLR (0x140714BB0), void *a1, i32 *x, i32 *y) {
 	auto pos = GetMousePosition ();
 	GetClientRect (windowHandle, &rect);
 
-	*x = (f32)pos.x / (rect.right - rect.left) * 1360;
-	*y = (f32)pos.y / (rect.bottom - rect.top) * 768;
+	auto width  = rect.right - rect.left;
+	auto height = rect.bottom - rect.top;
+
+	*x = (f32)pos.x / width * 1360;
+	*y = (f32)pos.y / height * 768;
 
 	return KeyboardIsDown (VK_LBUTTON);
 }

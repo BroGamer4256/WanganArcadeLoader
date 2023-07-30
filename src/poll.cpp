@@ -192,6 +192,7 @@ UpdatePoll (HWND windowHandle) {
 	currentMouseState.ScrolledDown = false;
 
 	GetCursorPos (&currentMouseState.Position);
+	ScreenToClient (windowHandle, &currentMouseState.Position);
 
 	SDL_Event event;
 	SDL_GameController *controller;
