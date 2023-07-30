@@ -9,11 +9,13 @@ openConfig (std::filesystem::path path) {
 		printWarning ("%s (%s): file does not exist\n", __func__, path.string ().c_str ());
 		return 0;
 	}
+
 	std::ifstream stream (path);
 	if (!stream.is_open ()) {
 		printWarning ("%s (%s): could not open\n", __func__, path.string ().c_str ());
 		return 0;
 	}
+
 	stream.seekg (0, stream.end);
 	u32 length = stream.tellg ();
 	stream.seekg (0, stream.beg);
