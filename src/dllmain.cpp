@@ -534,7 +534,6 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		// Safenet check
 		WRITE_NOP (ASLR (0x1409C800F), 2);
 
-		// Thanks dmr
 		if (skipTerminal) WRITE_NOP (ASLR (0x140744551), 5);
 
 		// Terminal touch screen
