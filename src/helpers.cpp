@@ -17,7 +17,7 @@ openConfig (std::filesystem::path path) {
 	}
 
 	stream.seekg (0, stream.end);
-	u32 length = stream.tellg ();
+	size_t length = stream.tellg ();
 	stream.seekg (0, stream.beg);
 
 	char *buf = (char *)calloc (length + 1, sizeof (char));
