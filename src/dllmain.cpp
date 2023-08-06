@@ -194,7 +194,6 @@ HOOK (void *, LoadCrown, ASLR (0x1409B39C0), u64 a1, i32 a2, u64 a3) {
 }
 
 HOOK (void, DebugPrint, ASLR (0x1409BCD80), u64 a1, i32 a2, wstring *str) {
-	if (a2 == 1) return;
 	wchar_t prefix[32] = L"";
 	if (a2 == 1) wcscpy (prefix, L"[Info]");
 	else if (a2 == 2) wcscpy (prefix, L"[Warning]");
@@ -350,7 +349,7 @@ HOOK (string *, ResolveFilePath, ASLR (0x1409F4C90), string *language, string *o
 	if (strncmp (path->c_str (), "sim:", 4) == 0) {
 		char *filePath = path->c_str () + 9; // remove sim:data/
 		for (auto dir : modDirs) {
-			std::filesystem::path modPath (dir / filePath);
+			std::filesystem::path modPath = dir / filePath;
 			if (std::filesystem::exists (modPath)) {
 				auto str = modPath.string ();
 				return out->create (str.c_str (), str.length () + 1);
@@ -539,6 +538,9 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		// Terminal touch screen
 		WRITE_NOP (ASLR (0x1409DEB50), 5);
 		WRITE_NOP (ASLR (0x1409DEC76), 5);
+
+		// Environment sensor skip
+		WRITE_MEMORY (ASLR (0x1409DF220), u8, 0xC3);
 
 		// Mostly stolen from openparrot
 		memset (haspBuffer, 0, 0xD40);
