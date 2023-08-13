@@ -200,7 +200,6 @@ HOOK (void, DebugPrint, ASLR (0x1409BCD80), u64 a1, i32 a2, wstring *str) {
 	else if (a2 == 3) wcscpy (prefix, L"[Check]");
 	else if (a2 == 4) wcscpy (prefix, L"[Error]");
 	wprintf (L"%ls%ls", prefix, str->c_str ());
-	// originalDebugPrint (a1, a2, str);
 }
 
 HOOK (HRESULT, CreateDeviceAndSwapChain, PROC_ADDRESS ("D3D11.dll", "D3D11CreateDeviceAndSwapChain"), void *pAdapter, i32 DriverType, HMODULE Software, u32 Flags, i32 *pFeatureLevels,
@@ -565,6 +564,10 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		// Card reading
 		WRITE_NOP (ASLR (0x1409D7C2B), 5);
 
+		// Stop terminal from crashing if another terminal already exists
+		WRITE_MEMORY (ASLR (0x140AE906B), u8, 0xEB);
+		WRITE_MEMORY (ASLR (0x140AE9120), u8, 0xEB);
+
 		// Mods
 		if (std::filesystem::exists (modDir)) {
 			for (auto dir : std::filesystem::directory_iterator (modDir))
@@ -584,8 +587,6 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 						MessageBoxA (0, buf, name.c_str (), MB_ICONERROR);
 					} else {
 						plugins.push_back (hModule);
-						auto exitEvent = GetProcAddress (hModule, "Exit");
-						if (exitEvent) atexit ((void (*) ())exitEvent);
 					}
 				}
 			}
