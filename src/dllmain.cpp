@@ -564,9 +564,9 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		// Card reading
 		WRITE_NOP (ASLR (0x1409D7C2B), 5);
 
-		// Stop terminal from crashing if another terminal already exists
-		WRITE_MEMORY (ASLR (0x140AE906B), u8, 0xEB);
-		WRITE_MEMORY (ASLR (0x140AE9120), u8, 0xEB);
+		// Stop terminal from recieving network requests (including its own)
+		WRITE_MEMORY (ASLR (0x140AE8FC0), u8, 0xC3);
+		WRITE_MEMORY (ASLR (0x140AE9090), u8, 0xC3);
 
 		// Mods
 		if (std::filesystem::exists (modDir)) {
