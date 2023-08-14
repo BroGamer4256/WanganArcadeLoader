@@ -2,6 +2,5 @@ terminal = false
 movies = true
 skipTerminal = true
 windowed = true
-rumble = true
 res = { x = 1360, y = 768 }
 mods = "mods"

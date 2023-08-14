@@ -49,7 +49,6 @@ library(
 		'src/dllmain.cpp',
 		'src/helpers.cpp',
 		'src/poll.cpp',
-		'src/ffb.cpp',
 		'src/hooks.asm',
 	],
 	name_prefix: ''
