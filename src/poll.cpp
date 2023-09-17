@@ -6,12 +6,12 @@ struct {
 	const char *string;
 	uint8_t keycode;
 } ConfigKeyboardButtons[] = {
-    {"F1", 0x70},        {"F2", 0x71},         {"F3", 0x72},    {"F4", 0x73},    {"F5", 0x74},      {"F6", 0x75},    {"F7", 0x76},  {"F8", 0x77},     {"F9", 0x78},      {"F10", 0x79},
-    {"F11", 0x7A},       {"F12", 0x7B},        {"NUM1", '1'},   {"NUM2", '2'},   {"NUM3", '3'},     {"NUM4", '4'},   {"NUM5", '5'}, {"NUM6", '6'},    {"NUM7", '7'},     {"NUM8", '8'},
+    {"F1", VK_F1},        {"F2", VK_F2},         {"F3", VK_F3},    {"F4", VK_F4},    {"F5", VK_F5},      {"F6", VK_F6},    {"F7", VK_F7},  {"F8", VK_F8},     {"F9", VK_F9},      {"F10", VK_F10},
+    {"F11", VK_F11},       {"F12", VK_F12},        {"NUM1", '1'},   {"NUM2", '2'},   {"NUM3", '3'},     {"NUM4", '4'},   {"NUM5", '5'}, {"NUM6", '6'},    {"NUM7", '7'},     {"NUM8", '8'},
     {"NUM9", '9'},       {"NUM0", '0'},        {"Q", 'Q'},      {"W", 'W'},      {"E", 'E'},        {"R", 'R'},      {"T", 'T'},    {"Y", 'Y'},       {"U", 'U'},        {"I", 'I'},
     {"O", 'O'},          {"P", 'P'},           {"A", 'A'},      {"S", 'S'},      {"D", 'D'},        {"F", 'F'},      {"G", 'G'},    {"H", 'H'},       {"J", 'J'},        {"K", 'K'},
-    {"L", 'L'},          {"Z", 'Z'},           {"X", 'X'},      {"C", 'C'},      {"V", 'V'},        {"B", 'B'},      {"N", 'N'},    {"M", 'M'},       {"UPARROW", 0x26}, {"LEFTARROW", 0x25},
-    {"DOWNARROW", 0x28}, {"RIGHTARROW", 0x27}, {"ENTER", 0x0D}, {"SPACE", 0x20}, {"CONTROL", 0x11}, {"SHIFT", 0x10}, {"TAB", 0x09}, {"ESCAPE", 0x1B},
+    {"L", 'L'},          {"Z", 'Z'},           {"X", 'X'},      {"C", 'C'},      {"V", 'V'},        {"B", 'B'},      {"N", 'N'},    {"M", 'M'},       {"UPARROW", VK_UP}, {"LEFTARROW", VK_LEFT},
+    {"DOWNARROW", VK_DOWN}, {"RIGHTARROW", VK_RIGHT}, {"ENTER", VK_RETURN}, {"SPACE", VK_SPACE}, {"CONTROL", VK_CONTROL}, {"SHIFT", VK_SHIFT}, {"TAB", VK_TAB}, {"ESCAPE", VK_ESCAPE},
 };
 
 struct {

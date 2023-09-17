@@ -400,6 +400,13 @@ i32 yRes  = 768;
 f32 ratio = 1.0;
 HOOK (void, RenderShape, ASLR (0x140A12CEE));
 HOOK (void, RenderText, ASLR (0x140A15FDB));
+
+f32
+realRenderShape (const char *lmdPath) {
+	if (strstr (lmdPath, "RIVALMARK")) return 1.0;
+	else return ratio;
+}
+
 void
 pluginCallback (i32 a1, i32 a2, u8 a3[168], u64 data) {
 	touchCallback (a1, a2, a3, data);
@@ -555,6 +562,15 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		INSTALL_HOOK (RenderShape);
 		INSTALL_HOOK (RenderText);
+
+		// Fix RIVALMARK
+		WRITE_NOP (ASLR (0x1400b34A8), 4);
+		WRITE_NOP (ASLR (0x1400b34CE), 4);
+
+		WRITE_NOP (ASLR (0x14078CC14), 9);
+		WRITE_NOP (ASLR (0x14078CC39), 5);
+
+		WRITE_MEMORY (ASLR (0x1414CD22C), f32, (f32)(yRes - 12.0));
 
 		// Card reading
 		WRITE_NOP (ASLR (0x1409D7C2B), 5);
