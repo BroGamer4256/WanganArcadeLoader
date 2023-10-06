@@ -32,15 +32,13 @@ sdl2 = subproject('sdl2', default_options: ['default_library=static', 'test=fals
 
 library(
 	'bngrw',
-	include_directories: [
-		'src',
-	],
 	link_with: [
 		minhook.get_variable('minhook_lib'),
 		tomlc99.get_variable('tomlc99_lib'),
 		sdl2.get_variable('sdl2'),
 	],
 	include_directories: [
+		'src',
 		minhook.get_variable('minhook_inc'),
 		tomlc99.get_variable('tomlc99_inc'),
 		sdl2.get_variable('core_inc'),
