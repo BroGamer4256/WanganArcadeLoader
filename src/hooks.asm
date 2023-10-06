@@ -40,7 +40,9 @@ extern whereRenderText
 section .text
 implOfRenderShape:
 	pushaq
+	sub rsp, 0x20
 	call realRenderShape
+	add rsp, 0x20
 	popaq
 
 	movss xmm11, xmm0
