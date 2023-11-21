@@ -396,6 +396,9 @@ HOOK (bool, GetTouch, ASLR (0x140714BB0), void *a1, i32 *x, i32 *y) {
 	return KeyboardIsDown (VK_LBUTTON);
 }
 
+HOOK (i32, GetRanking, ASLR (0x1406C41C0)) { return 1; }
+HOOK (i32, PreparePlay, ASLR (0x1406D2200)) { return 1; }
+
 extern "C" {
 i32 xRes  = 1360;
 i32 yRes  = 768;
@@ -470,12 +473,14 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		bool movies          = true;
 		bool skipTerminal    = true;
 		bool windowed        = true;
+		bool hideTA          = false;
 		char modDir[1024]    = "mods";
 		if (config) {
 			isTerminal   = readConfigBool (config, "terminal", isTerminal);
 			movies       = readConfigBool (config, "movies", movies);
 			skipTerminal = readConfigBool (config, "skipTerminal", skipTerminal);
 			windowed     = readConfigBool (config, "windowed", windowed);
+			hideTA       = readConfigBool (config, "hideTA", hideTA);
 			auto res     = openConfigSection (config, "res");
 			if (res) {
 				xRes  = readConfigInt (res, "x", xRes);
@@ -525,6 +530,11 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		INSTALL_HOOK (GetTouchPos);
 		INSTALL_HOOK (GetTouch);
+
+		if (hideTA) {
+			INSTALL_HOOK (GetRanking);
+			INSTALL_HOOK (PreparePlay);
+		}
 
 		INSTALL_HOOK (DongleCheck);
 

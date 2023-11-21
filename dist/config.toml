@@ -4,6 +4,7 @@ skipTerminal = true
 windowed = true
 res = { x = 1360, y = 768 }
 mods = "mods"
+hideTA = false
 
 [dongle]
 driver = "285013501138"
