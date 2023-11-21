@@ -448,7 +448,7 @@ createCard () {
 	WritePrivateProfileStringA ("card", "chipId", buf, ".\\card.ini");
 }
 
-HOOK (u64, DongleCheck, 0x1409C2180, u64 a1) {
+HOOK (u64, DongleCheck, ASLR (0x1409C2180), u64 a1) {
 	strcpy ((char *)(a1 + 0x78), dongle);
 	return 1;
 }
