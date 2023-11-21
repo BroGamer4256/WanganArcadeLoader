@@ -12,6 +12,7 @@ bool waitingForTouch = false;
 bool touchFinished   = false;
 u64 touchData;
 callbackTouch touchCallback;
+char dongle[32];
 
 char accessCode[21] = "00000000000000000000";
 char chipId[33]     = "00000000000000000000000000000000";
@@ -447,6 +448,11 @@ createCard () {
 	WritePrivateProfileStringA ("card", "chipId", buf, ".\\card.ini");
 }
 
+HOOK (u64, DongleCheck, 0x1409C2180, u64 a1) {
+	strcpy ((char *)(a1 + 0x78), dongle);
+	return 1;
+}
+
 BOOL
 DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 	if (reason == DLL_PROCESS_ATTACH) {
@@ -477,6 +483,10 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 				ratio = 768.0 / (f32)yRes;
 			}
 			strcpy_s (modDir, readConfigString (config, "mods", modDir));
+
+			auto dongleSection = openConfigSection (config, "dongle");
+			if (isTerminal) strcpy_s (dongle, readConfigString (dongleSection, "terminal", "285011501138"));
+			else strcpy_s (dongle, readConfigString (dongleSection, "driver", "285013501138"));
 
 			toml_free (config);
 		}
@@ -516,6 +526,8 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (GetTouchPos);
 		INSTALL_HOOK (GetTouch);
 
+		INSTALL_HOOK (DongleCheck);
+
 		// Display all debug print messages
 		WRITE_MEMORY (ASLR (0x1409BD193), u8, 0xEB);
 
@@ -547,8 +559,9 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 
 		// Mostly stolen from openparrot
 		memset (haspBuffer, 0, 0xD40);
-		if (isTerminal) strcpy ((char *)(haspBuffer + 0xD00), "285011501138");
-		else strcpy ((char *)(haspBuffer + 0xD00), "285013501138");
+
+		strcpy ((char *)(haspBuffer + 0xD00), dongle);
+
 		u8 crc = 0;
 		for (int i = 0; i < 62; i++)
 			crc += haspBuffer[0xD00 + i];
