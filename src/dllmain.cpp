@@ -290,6 +290,7 @@ HOOK (InputData *, WAJVGetInput, ASLR (0x140017890), u32 index) {
 HOOK (bool, WAJVOpen, ASLR (0x1400169C0), const char *jvsComPath) { return 1; }
 HOOK (i32, WAJVGetStatus, ASLR (0x140017840)) { return 1; }
 HOOK (i32, WAJVGetNodeCount, ASLR (0x140017880)) { return 1; }
+HOOK (BOOL, SetSysTime, PROC_ADDRESS ("kernel32.dll", "SetSystemTime"), void *) { return TRUE; }
 HOOK (i32, ShowMouse, PROC_ADDRESS ("user32.dll", "ShowCursor"), i32 show) { return originalShowMouse (true); }
 
 HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int styleEx, wchar_t *className, wchar_t *windowName, int style, int x, int y, int width, int height, HWND parent,
@@ -502,6 +503,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (WAJVGetStatus);
 		INSTALL_HOOK (WAJVGetNodeCount);
 
+		INSTALL_HOOK (SetSysTime);
 		INSTALL_HOOK (ShowMouse);
 		INSTALL_HOOK (WindowCreateW);
 		if (!movies) INSTALL_HOOK (MoviePlayerOpen);
