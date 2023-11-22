@@ -297,7 +297,7 @@ HOOK (i32, ShowMouse, PROC_ADDRESS ("user32.dll", "ShowCursor"), i32 show) { ret
 HOOK (HWND, WindowCreateW, PROC_ADDRESS ("user32.dll", "CreateWindowExW"), int styleEx, wchar_t *className, wchar_t *windowName, int style, int x, int y, int width, int height, HWND parent,
       void *menu, void *instance, void *param) {
 	HWND handle = originalWindowCreateW (styleEx, className, windowName, style, x, y, width, height, parent, menu, instance, param);
-	if (windowHandle == 0 && wcscmp (className, L"class_name") == 0) {
+	if (windowName != 0 && windowHandle == 0 && wcscmp (windowName, L"湾岸ミッドナイトMAXIMUM TUNE 6RR") == 0) {
 		auto configPath      = std::filesystem::current_path () / "keyconfig.toml";
 		toml_table_t *config = openConfig (configPath);
 		if (config) {
@@ -489,9 +489,17 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 			}
 			strcpy_s (modDir, readConfigString (config, "mods", modDir));
 
+			// clang-format off
 			auto dongleSection = openConfigSection (config, "dongle");
-			if (isTerminal) strcpy_s (dongle, readConfigString (dongleSection, "terminal", "285011501138"));
-			else strcpy_s (dongle, readConfigString (dongleSection, "driver", "285013501138"));
+			if (dongleSection) {
+				if (isTerminal) strcpy_s (dongle, readConfigString (dongleSection, "terminal", (char *)"285011501138"));
+				else strcpy_s (dongle, readConfigString (dongleSection, "driver", (char *)"285013501138"));
+			}
+			else {
+				if (isTerminal) strcpy_s (dongle, "285011501138");
+				else strcpy_s (dongle, "285013501138");
+			}
+			// clang-format on
 
 			toml_free (config);
 		}
