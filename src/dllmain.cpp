@@ -398,6 +398,8 @@ HOOK (bool, GetTouch, ASLR (0x140714BB0), void *a1, i32 *x, i32 *y) {
 
 HOOK (i32, GetRanking, ASLR (0x1406C41C0)) { return 1; }
 HOOK (i32, PreparePlay, ASLR (0x1406D2200)) { return 1; }
+HOOK (bool, IsPlayableCar, ASLR (0x1400C4470)) { return true; }
+HOOK (bool, IsNonPlayableCar, ASLR (0x1400C4590)) { return false; }
 
 extern "C" {
 i32 xRes  = 1360;
@@ -543,6 +545,9 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 			INSTALL_HOOK (GetRanking);
 			INSTALL_HOOK (PreparePlay);
 		}
+
+		INSTALL_HOOK (IsPlayableCar);
+		INSTALL_HOOK (IsNonPlayableCar);
 
 		INSTALL_HOOK (DongleCheck);
 
