@@ -53,7 +53,14 @@ implOfRenderShape:
 	jmp rax
 
 implOfRenderText:
-	movss xmm14, [rel ratio]
+	pushaq
+	sub rsp, 0x20
+	mov rcx, [rbx + 0x08]
+	mov rcx, [rcx + 0x08]
+	call realRenderShape
+	add rsp, 0x20
+	popaq
+	movss xmm14, xmm0
 	movss dword [rbp - 0x28], xmm14
 	movss dword [rbp - 0x18], xmm12
 
