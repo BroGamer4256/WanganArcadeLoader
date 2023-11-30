@@ -400,7 +400,6 @@ HOOK (i32, GetRanking, ASLR (0x1406C41C0)) { return 1; }
 HOOK (i32, PreparePlay, ASLR (0x1406D2200)) { return 1; }
 HOOK (bool, IsPlayableCar, ASLR (0x1400C4470)) { return true; }
 HOOK (bool, IsNonPlayableCar, ASLR (0x1400C4590)) { return false; }
-HOOK (bool, TimerUpdate, ASLR (0x1404B96D0)) { return false; }
 
 extern "C" {
 i32 xRes  = 1360;
@@ -552,7 +551,7 @@ DllMain (HMODULE module, DWORD reason, LPVOID reserved) {
 		INSTALL_HOOK (IsPlayableCar);
 		INSTALL_HOOK (IsNonPlayableCar);
 
-		if (timerFreeze) INSTALL_HOOK (TimerUpdate);
+		if (timerFreeze) WRITE_NOP (ASLR (0x1405C2F68), 5);
 
 		INSTALL_HOOK (DongleCheck);
 
