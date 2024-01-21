@@ -9,4 +9,4 @@ timerFreeze = false
 
 [dongle]
 driver = "285013501138"
-terminal = "285013501138"
+terminal = "285011501138"
